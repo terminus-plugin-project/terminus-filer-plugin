@@ -1,5 +1,5 @@
 {
-  "name": "sean-e-dietrich/terminus-filer",
+  "name": "terminus-plugin-project/terminus-filer-plugin",
   "description": "Filer - A Terminus plugin for SFTP Connections",
   "homepage": "https://github.com/terminus-plugin-project/terminus-filer",
   "license": "MIT",
