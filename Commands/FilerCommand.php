@@ -1,12 +1,11 @@
 <?php
 
-namespace Pantheon\TerminusFiler\Commands;
+namespace Terminus\Commands;
 
-use Pantheon\Terminus\Commands\TerminusCommand;
-use Pantheon\Terminus\Site\SiteAwareInterface;
-use Pantheon\Terminus\Site\SiteAwareTrait;
-use Pantheon\Terminus\Collections\Sites;
-use Pantheon\Terminus\Exceptions\TerminusException;
+use Terminus\Collections\Sites;
+use Terminus\Commands\TerminusCommand;
+use Terminus\Exceptions\TerminusException;
+use Terminus\Utils;
 
 // Get environment variables, if available
 $bitkinex = getenv('TERMINUS_FILER_BITKINEX_LOC');
@@ -63,73 +62,89 @@ switch (OS) {
     );
       break;
   default:
-    $this->log()->error('Operating system not supported.');
-    die;
+    $this->failure('Operating system not supported.');
 }
 
 /**
- * Class FilerCommand
  * Opens the Site using an SFTP Client
+ *
+ * @command site
  */
-class FilerCommand extends TerminusCommand implements SiteAwareInterface
-{
-  
-  use SiteAwareTrait;
+class FilerCommand extends TerminusCommand {
+  /**
+   * Object constructor
+   *
+   * @param array $options
+   * @return FilerCommand
+   */
+
+  public function __construct(array $options = []) {
+    $options['require_login'] = true;
+    parent::__construct($options);
+    $this->sites = new Sites();
+  }
 
   /**
    * Opens the Site using an SFTP Client
    *
-   * @authorize
+   * ## OPTIONS
    *
-   * @command site:filer
-   * @aliases filer
+   * [--site=<site>]
+   * : Site to Use
    *
-   * @param string $site_env Site & environment in the format `site-name.env`
-   * @option string $app Application to Open (optional)
-   * @option string $bundle Bundle Identifier (optional)
-   * @option boolean $persistant Whether to persist the connection (optional)
-   * @option string $app_args Application arguments (option)
+   * [--env=<env>]
+   * : Environment
    *
-   * @usage terminus site:filer <site>.<env> --app=<app>
-   * @usage terminus site:filer <site>.<env> --bundle=<bundle>
-   * @usage terminus site:filer <site>.<env> --app=<app> --persistant=<persistant> --app_args=<app_args>
+   * [--a=<app>]
+   * : Application to Open (optional)
+   *
+   * [--b=<bundle>]
+   * : Bundle Identifier (optional)
+   *
+   * [--p=<true|false>]
+   * : Whether to persist the connection
+   *
+   * ## EXAMPLES
+   *  terminus site filer --site=test
+   *
+   * @subcommand filer
+   * @alias file
    */
-  public function filer($site_env, $options = ['app' => NULL, 'bundle' => NULL, 'persistant' => false, 'app_args' => NULL]) {
+  public function filer($args, $assoc_args) {
+    $site = $this->sites->get(
+      $this->input()->siteName(array('args' => $assoc_args))
+    );
+
     $supported_apps = unserialize(SUPPORTED_APPS);
     $app = '';
-    if (isset($options['app'])) {
-      $app = $options['app'];
+    if (isset($assoc_args['a'])) {
+      $app = $assoc_args['a'];
     }
     if (!in_array($app, $supported_apps)) {
-      $this->log()->warning('App not tested.');
+      $this->failure('App not supported.');
     }
+
     $supported_bundles = array(
       '',
       'com.panic.transmit',
       'ch.sudo.cyberduck',
     );
     $bundle = '';
-    if (isset($options['bundle'])) {
-      $bundle = $options['bundle'];
+    if (isset($assoc_args['b'])) {
+      $bundle = $assoc_args['b'];
     }
-
     if (!in_array($bundle, $supported_bundles)) {
-      $this->log()->warning('Bundle currently not tested.');
-    }
-
-    if(!isset($options['bundle']) && !isset($options['app'])){
-      $this->log()->error('--app or --bundle flag is required');
-      die;
+      $this->failure('Bundle not supported.');
     }
 
     $persist = false;
-    if (isset($options['persistant'])) {
-      $persist = $options['persistant'];
+    if (isset($assoc_args['p'])) {
+      $persist = $assoc_args['p'];
     }
 
     $app_args = '';
-    if (isset($options['app_args'])) {
-      $app_args = $options['app_args'];
+    if (isset($assoc_args['app_args'])) {
+      $app_args = $assoc_args['app_args'];
     }
 
     $type = 'b';
@@ -138,14 +153,15 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
     } else {
       $app = $bundle;
     }
-    
-    list($site, $env) = $this->getSiteEnv($site_env);
-    $connection_info = $env->sftpConnectionInfo();
-    $domain = $env->id . '-' . $site->get('name') . '.pantheon.io';
+
+    $env = $this->input()->env(array('args' => $assoc_args, 'site' => $site));
+    $environment = $site->environments->get($env);
+    $connection_info = $environment->connectionInfo();
+    $domain = $env . '-' . $site->get('name') . '.pantheon.io';
 
     if ($persist) {
       // Additional connection information
-      $id = substr(md5($domain), 0, 8) . '-' . $site->id;
+      $id = substr(md5($domain), 0, 8) . '-' . $site->get('id');
       $connection_info['id'] = $id;
       $connection_info['domain'] = $domain;
       $connection_info['timestamp'] = time();
@@ -157,8 +173,7 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
               . '\\AppData\\Roaming\\Cyberduck\\Bookmarks\\' . $id . '.duck';
               break;
           default:
-            $this->log()->error('Operating system not supported.');
-            die;
+            $this->failure('Operating system not supported.');
         }
         $bookmark_xml = $this->getBookmarkXml($connection_info);
         if ($this->writeXml($bookmark_file, $bookmark_xml)) {
@@ -166,7 +181,7 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
         }
       }
     } else {
-      $connection = $connection_info['url'];
+      $connection = $connection_info['sftp_url'];
     }
 
     // Operating system specific checks
@@ -189,11 +204,16 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
           break;
     }
 
-    $this->log()->notice(
+    $this->log()->info(
       'Opening {domain} in {app}', array('domain' => $domain, 'app' => $app)
     );
 
-    if ($this->validCommand($app)){
+    // Wake the Site
+    $environment->wake();
+
+    // Open the Site in app/bundle
+    $this->log()->info($command);
+    if ($this->validCommand($app)) {
       exec($command);
     }
   }
@@ -201,54 +221,57 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
   /**
    * Opens the Site using Transmit SFTP Client
    *
-   * @authorize
+   * ## OPTIONS
    *
-   * @command site:filer:transmit
-   * @aliases site:filer:panic site:transmit site:panic
+   * [--site=<site>]
+   * : Site to Use
    *
-   * @param string $site_env Site & environment in the format `site-name.env`
+   * [--env=<env>]
+   * : Environment
    *
-   * @usage terminus site:filer:transmit <site>.<env>
-   * @usage terminus site:filer:panic <site>.<env>
-   * @usage terminus site:transmit <site>.<env>
-   * @usage terminus site:panic <site>.<env>
+   * ## EXAMPLES
+   *  terminus site transmit --site=test
+   *
+   * @subcommand transmit
+   * @alias panic
    */
-  public function transmit($site_env) {
+  public function transmit($args, $assoc_args) {
     if (OS != 'DAR') {
-      $this->log()->error('Operating system not supported.');
-      die;
+      $this->failure('Operating system not supported.');
     }
-    $this->filer($site_env, ['bundle' => 'com.panic.transmit']);
+    $assoc_args['b'] = 'com.panic.transmit';
+    $this->filer($args, $assoc_args);
   }
 
   /**
    * Opens the Site using Cyberduck SFTP Client
    *
-   * @authorize
+   * ## OPTIONS
    *
-   * @command site:filer:cyberduck
-   * @aliases site:filer:duck site:cyberduck site:duck
+   * [--site=<site>]
+   * : Site to Use
    *
-   * @param string $site_env Site & environment in the format `site-name.env`
+   * [--env=<env>]
+   * : Environment
    *
-   * @usage terminus site:filer:cyberduck <site>.<env>
-   * @usage terminus site:filer:duck <site>.<env>
-   * @usage terminus site:cyberduck <site>.<env>
-   * @usage terminus site:duck <site>.<env>
+   * ## EXAMPLES
+   *  terminus site cyberduck --site=test
+   *
+   * @subcommand cyberduck
+   * @alias duck
    */
   public function cyberduck($args, $assoc_args) {
     switch (OS) {
       case 'DAR':
-        $assoc_args['bundle'] = 'ch.sudo.cyberduck';
+        $assoc_args['b'] = 'ch.sudo.cyberduck';
           break;
       case 'WIN':
-        $assoc_args['app'] = CYBERDUCK;
-        $assoc_args['persistant'] = true;
+        $assoc_args['a'] = CYBERDUCK;
+        $assoc_args['p'] = true;
           break;
       case 'LIN':
       default:
-        $this->log()->error('Operating system not supported.');
-        die;
+        $this->failure('Operating system not supported.');
     }
     $this->filer($args, $assoc_args);
   }
@@ -256,20 +279,22 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
   /**
    * Opens the Site using FileZilla SFTP Client
    *
-   * @authorize
+   * ## OPTIONS
    *
-   * @command site:filer:filezilla
-   * @aliases site:filer:zilla site:filezilla site:zilla
+   * [--site=<site>]
+   * : Site to Use
    *
-   * @param string $site_env Site & environment in the format `site-name.env`
+   * [--env=<env>]
+   * : Environment
    *
-   * @usage terminus site:filer:filezilla <site>.<env>
-   * @usage terminus site:filer:zilla <site>.<env>
-   * @usage terminus site:filezilla <site>.<env>
-   * @usage terminus site:zilla <site>.<env>
+   * ## EXAMPLES
+   *  terminus site filezilla --site=test
+   *
+   * @subcommand filezilla
+   * @alias zilla
    */
   public function filezilla($args, $assoc_args) {
-    $assoc_args['app'] = FILEZILLA;
+    $assoc_args['a'] = FILEZILLA;
     $assoc_args['app_args'] = '-l ask';
     $this->filer($args, $assoc_args);
   }
@@ -277,24 +302,25 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
   /**
    * Opens the Site using BitKinex SFTP Client
    *
-   * @authorize
+   * ## OPTIONS
    *
-   * @command site:filer:bitkinex
-   * @aliases site:filer:bit site:bitkinex site:bit
+   * [--site=<site>]
+   * : Site to Use
    *
-   * @param string $site_env Site & environment in the format `site-name.env`
+   * [--env=<env>]
+   * : Environment
    *
-   * @usage terminus site:filer:bitkinex <site>.<env>
-   * @usage terminus site:filer:bit <site>.<env>
-   * @usage terminus site:bitkinex <site>.<env>
-   * @usage terminus site:bit <site>.<env>
+   * ## EXAMPLES
+   *  terminus site bitkinex --site=test
+   *
+   * @subcommand bitkinex
+   * @alias bit
    */
   public function bitkinex($args, $assoc_args) {
-    if (!defined(PHP_WINDOWS_VERSION_MAJOR)) {
-      $this->log()->error('Operating system not supported.');
-      die;
+    if (!Utils\isWindows()) {
+      $this->failure('Operating system not supported.');
     }
-    $assoc_args['app'] = BITKINEX;
+    $assoc_args['a'] = BITKINEX;
     $assoc_args['app_args'] = 'browse';
     $this->filer($args, $assoc_args);
   }
@@ -302,24 +328,25 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
   /**
    * Opens the Site using WinSCP SFTP Client
    *
-   * @authorize
+   * ## OPTIONS
    *
-   * @command site:filer:winscp
-   * @aliases site:filer:scp site:winscp site:scp
+   * [--site=<site>]
+   * : Site to Use
    *
-   * @param string $site_env Site & environment in the format `site-name.env`
+   * [--env=<env>]
+   * : Environment
    *
-   * @usage terminus site:filer:winscp <site>.<env>
-   * @usage terminus site:filer:scp <site>.<env>
-   * @usage terminus site:winscp <site>.<env>
-   * @usage terminus site:scp <site>.<env>
+   * ## EXAMPLES
+   *  terminus site winscp --site=test
+   *
+   * @subcommand winscp
+   * @alias scp
    */
   public function winscp($args, $assoc_args) {
-    if (!defined(PHP_WINDOWS_VERSION_MAJOR)) {
-      $this->log()->error('Operating system not supported.');
-      die;
+    if (!Utils\isWindows()) {
+      $this->failure('Operating system not supported.');
     }
-    $assoc_args['app'] = WINSCP;
+    $assoc_args['a'] = WINSCP;
     $this->filer($args, $assoc_args);
   }
 
@@ -342,11 +369,11 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
   <key>UUID</key>
   <string>{$ci['id']}</string>
   <key>Hostname</key>
-  <string>{$ci['host']}</string>
+  <string>{$ci['sftp_host']}</string>
   <key>Port</key>
-  <string>{$ci['port']}</string>
+  <string>{$ci['git_port']}</string>
   <key>Username</key>
-  <string>{$ci['username']}</string>
+  <string>{$ci['sftp_username']}</string>
   <key>Path</key>
   <string></string>
   <key>Access Timestamp</key>
@@ -369,8 +396,8 @@ XML;
       fwrite($handle, $data);
       fclose($handle);
     } catch (Exception $e) {
-      $this->log()->error($e->getMessage());
-      die;
+      $this->failure($e->getMessage());
+      return false;
     }
     return true;
   }
@@ -388,11 +415,9 @@ XML;
     switch (OS) {
       case 'DAR':
         switch ($file) {
-          case 'Cyberduck':
           case 'ch.sudo.cyberduck':
             $file = '/Applications/Cyberduck.app/Contents/MacOS/Cyberduck';
               break;
-          case 'Transmit':
           case 'com.panic.transmit':
             $file = '/Applications/Transmit.app/Contents/MacOS/Transmit';
               break;
@@ -410,8 +435,7 @@ XML;
     }
     exec("ls $file", $output);
     if (empty($output)) {
-      $this->log()->error("$file does not exist.");
-      die;
+      $this->failure("$file does not exist.");
       return false;
     }
     return true;

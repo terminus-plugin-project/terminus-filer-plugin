@@ -18,38 +18,38 @@ Adds a sub-command to 'site' which is called 'filer'. This opens a site in your 
 
 ## Examples
 ### Reference Application Name
-`$ terminus site:filer companysite-33.dev --app=transmit`
+`$ terminus site filer --site=companysite-33 --env=dev --a=transmit`
 
 ### Reference Application Bundle Name
-`$ terminus site:filer companysite-33.dev --bundle=com.panic.transmit`
+`$ terminus site filer --site=companysite-33 --env=dev --b=com.panic.transmit`
 
 ### Shortcut for Panic's Transmit
-`$ terminus site:transmit companysite-33.dev`
+`$ terminus site transmit --site=companysite-33 --env=dev`
 
-`$ terminus site:panic companysite-33.dev`
+`$ terminus site panic --site=companysite-33 --env=dev`
 
 ### Shortcut for Cyberduck
-`$ terminus site:cyberduck companysite-33.dev`
+`$ terminus site cyberduck --site=companysite-33 --env=dev`
 
-`$ terminus site:duck companysite-33.dev`
+`$ terminus site duck --site=companysite-33 --env=dev`
 
 ### Shortcut for FileZilla
-`$ terminus site:filezilla companysite-33.dev`
+`$ terminus site filezilla --site=companysite-33 --env=dev`
 
-`$ terminus site:zilla companysite-33.dev`
+`$ terminus site zilla --site=companysite-33 --env=dev`
 
 ### Shortcut for BitKinex
-`$ terminus site:bitkinex companysite-33.dev`
+`$ terminus site bitkinex --site=companysite-33 --env=dev`
 
-`$ terminus site:bit companysite-33.dev`
+`$ terminus site bit --site=companysite-33 --env=dev`
 
 ### Shortcut for WinSCP
-`$ terminus site:winscp companysite-33.dev`
+`$ terminus site winscp --site=companysite-33 --env=dev`
 
-`$ terminus site:scp companysite-33.dev`
+`$ terminus site scp --site=companysite-33 --env=dev`
 
 ## Installation
-For help installing, see [Terminus's Plugins](https://pantheon.io/docs/terminus/plugins/).
+For help installing, see [Terminus's Wiki](https://github.com/pantheon-systems/terminus/wiki/Plugins).
 
 ## Windows
 
@@ -71,5 +71,4 @@ Example: `TEMINUS_FILER_BITKINEX_LOC="C:\BitKinex\bitkinex.exe"`
 See http://www.computerhope.com/issues/ch000549.htm for information on how to set environment variables in Windows.
 
 ## Help
-Run `terminus help site:filer` for help.
-
+Run `terminus help site filer` for help.

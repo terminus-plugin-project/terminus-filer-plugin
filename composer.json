@@ -1,18 +1,9 @@
 {
-  "name": "terminus-plugin-project/terminus-filer-plugin",
+  "name": "sean-e-dietrich/terminus-filer",
   "description": "Filer - A Terminus plugin for SFTP Connections",
-  "homepage": "https://github.com/terminus-plugin-project/terminus-filer",
+  "homepage": "https://github.com/sean-e-dietrich/terminus-filer",
   "license": "MIT",
-  "type": "terminus-plugin",
   "require": {
     "php": ">=5.4"
-  },
-  "autoload": {
-    "psr-4": { "Pantheon\\TerminusFiler\\": "src" }
-  },
-  "extra": {
-    "terminus": {
-      "compatible-version": "^1"
-    }
   }
 }
