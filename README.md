@@ -49,7 +49,12 @@ Adds a sub-command to 'site' which is called 'filer'. This opens a site in your 
 `$ terminus site:scp companysite-33.dev`
 
 ## Installation
-For help installing, see [Terminus's Plugins](https://pantheon.io/docs/terminus/plugins/).
+Create plugin directory
+`mkdir ~/.terminus/plugins`
+Install using composer
+`composer create-project -d ~/.terminus/plugins terminus-plugin-project/terminus-filer-plugin:~1`
+
+For help additional help installing, see [Terminus's Plugins](https://pantheon.io/docs/terminus/plugins/).
 
 ## Windows
 
