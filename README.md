@@ -1,10 +1,12 @@
-# Filer
+# Terminus Filer Plugin
+[![Terminus v1.x Compatible](https://img.shields.io/badge/terminus-v1.x-green.svg)](https://github.com/terminus-plugin-project/terminus-filer-plugin/tree/1.x)
+[![Terminus v0.x Compatible](https://img.shields.io/badge/terminus-v0.x-green.svg)](https://github.com/terminus-plugin-project/terminus-filer-plugin/tree/0.x)
 
-Terminus plugin to open Pantheon sites using an SFTP client
+Terminus plugin to open Pantheon sites using an SFTP client.
 
 Adds a sub-command to 'site' which is called 'filer'. This opens a site in your favorite SFTP client.
 
-## Supported
+## Supported SFTP Apps
 
 [Transmit](https://panic.com/transmit/) (Mac only)
 
@@ -54,12 +56,14 @@ Adds a sub-command to 'site' which is called 'filer'. This opens a site in your 
 `$ terminus sftp companysite-33.dev`
 
 ## Installation
-Create plugin directory
-`mkdir ~/.terminus/plugins`
-Install using composer
-`composer create-project -d ~/.terminus/plugins terminus-plugin-project/terminus-filer-plugin:~1`
+To install this plugin place it in `~/.terminus/plugins/`.
 
-For help additional help installing, see [Terminus' Plugins](https://pantheon.io/docs/terminus/plugins/).
+On Mac OS/Linux:
+```
+mkdir -p ~/.terminus/plugins
+composer create-project -d ~/.terminus/plugins terminus-plugin-project/terminus-filer-plugin:~1
+```
+For additional help installing, see [Terminus' Plugins](https://pantheon.io/docs/terminus/plugins/).
 
 ## Windows
 
