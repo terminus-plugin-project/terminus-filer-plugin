@@ -1,8 +1,8 @@
 # Filer
 
-Terminus plugin to open Pantheon Sites using an SFTP Client
+Terminus plugin to open Pantheon sites using an SFTP client
 
-Adds a sub-command to 'site' which is called 'filer'. This opens a site in your favorite SFTP Client.
+Adds a sub-command to 'site' which is called 'filer'. This opens a site in your favorite SFTP client.
 
 ## Supported
 
@@ -16,37 +16,42 @@ Adds a sub-command to 'site' which is called 'filer'. This opens a site in your 
 
 [WinSCP](https://winscp.net/) (Windows only)
 
+**SFTP** (Mac and Linux)
+
 ## Examples
 ### Reference Application Name
-`$ terminus site:filer companysite-33.dev --app=transmit`
+`$ terminus filer companysite-33.dev --app=transmit`
 
 ### Reference Application Bundle Name
-`$ terminus site:filer companysite-33.dev --bundle=com.panic.transmit`
+`$ terminus filer companysite-33.dev --bundle=com.panic.transmit`
 
 ### Shortcut for Panic's Transmit
-`$ terminus site:transmit companysite-33.dev`
+`$ terminus transmit companysite-33.dev`
 
-`$ terminus site:panic companysite-33.dev`
+`$ terminus panic companysite-33.dev`
 
 ### Shortcut for Cyberduck
-`$ terminus site:cyberduck companysite-33.dev`
+`$ terminus cyberduck companysite-33.dev`
 
-`$ terminus site:duck companysite-33.dev`
+`$ terminus duck companysite-33.dev`
 
 ### Shortcut for FileZilla
-`$ terminus site:filezilla companysite-33.dev`
+`$ terminus filezilla companysite-33.dev`
 
-`$ terminus site:zilla companysite-33.dev`
+`$ terminus zilla companysite-33.dev`
 
 ### Shortcut for BitKinex
-`$ terminus site:bitkinex companysite-33.dev`
+`$ terminus bitkinex companysite-33.dev`
 
-`$ terminus site:bit companysite-33.dev`
+`$ terminus bit companysite-33.dev`
 
 ### Shortcut for WinSCP
-`$ terminus site:winscp companysite-33.dev`
+`$ terminus winscp companysite-33.dev`
 
-`$ terminus site:scp companysite-33.dev`
+`$ terminus scp companysite-33.dev`
+
+### Shortcut for SFTP
+`$ terminus sftp companysite-33.dev`
 
 ## Installation
 Create plugin directory
@@ -54,7 +59,7 @@ Create plugin directory
 Install using composer
 `composer create-project -d ~/.terminus/plugins terminus-plugin-project/terminus-filer-plugin:~1`
 
-For help additional help installing, see [Terminus's Plugins](https://pantheon.io/docs/terminus/plugins/).
+For help additional help installing, see [Terminus' Plugins](https://pantheon.io/docs/terminus/plugins/).
 
 ## Windows
 
@@ -67,6 +72,8 @@ Cyberduck - TERMINUS_FILER_CYBERDUCK_LOC
 FileZilla - TERMINUS_FILER_FILEZILLA_LOC
 
 WinSCP - TERMINUS_FILER_WINSCP_LOC
+
+SFTP - TERMINUS_FILER_SFTP_LOC
 ```
 
 Make sure to include the full path to the executable (including the executable itself).
@@ -76,5 +83,4 @@ Example: `TEMINUS_FILER_BITKINEX_LOC="C:\BitKinex\bitkinex.exe"`
 See http://www.computerhope.com/issues/ch000549.htm for information on how to set environment variables in Windows.
 
 ## Help
-Run `terminus help site:filer` for help.
-
+Run `terminus help filer` for help.

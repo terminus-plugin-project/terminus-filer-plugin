@@ -188,28 +188,18 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
                     $app_args = "--args $app_args";
                 }
                 $connect = 'open -%s %s %s %s';
-                if ($app == 'sftp') {
-                    $command = "{$connection_info['command']} 2>&1";
-                } else {
-                    $command = sprintf($connect, $type, $app, $app_args, $connection);
-                }
+                $command = sprintf($connect, $type, $app, $app_args, $connection);
                     break;
+
             case 'LIN':
                 $connect = '%s %s %s %s';
                 $redirect = '> /dev/null 2> /dev/null &';
-                if ($app == 'sftp') {
-                    $command = "{$connection_info['command']} 2>&1";
-                } else {
-                    $command = sprintf($connect, $app, $app_args, $connection, $redirect);
-                }
+                $command = sprintf($connect, $app, $app_args, $connection, $redirect);
                     break;
+
             case 'WIN':
                 $connect = 'start "" /b %s %s %s';
-                if ($app == 'sftp') {
-                    $command = "{$connection_info['command']}";
-                } else {
-                    $command = sprintf($connect, $app, $app_args, $connection);
-                }
+                $command = sprintf($connect, $app, $app_args, $connection);
                     break;
         }
 
@@ -219,7 +209,8 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
 
         if ($this->validCommand($app)){
             if ($app == 'sftp') {
-                passthru($command);
+                $command = $connection_info['command'];
+                $this->execute($command);
             } else {
                 exec($command);
             }
@@ -374,6 +365,22 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
     public function sftp($site_env) {
         $options['app'] = SFTP;
         $this->filer($site_env, $options);
+    }
+
+    /**
+     * Executes the command.
+     */
+    protected function execute($cmd) {
+        $process = proc_open(
+            $cmd,
+            [
+                0 => STDIN,
+                1 => STDOUT,
+                2 => STDERR,
+            ],
+            $pipes
+        );
+        proc_close($process);
     }
 
     /**
