@@ -12,7 +12,7 @@
   },
   "extra": {
     "terminus": {
-      "compatible-version": "^2"
+      "compatible-version": "^2|^3"
     }
   }
 }
