@@ -58,14 +58,20 @@ Adds a sub-command to 'site' which is called 'filer'. This opens a site in your 
 `$ terminus sftp companysite-33.dev`
 
 ## Installation
-To install this plugin place it in `~/.terminus/plugins/`.
 
-On Mac OS/Linux:
+There are a few different ways to install [Terminus' Plugins](https://pantheon.io/docs/terminus/plugins/)...
+
+### With Terminus
+```sh
+terminus self:plugin:install  terminus-plugin-project/terminus-filer-plugin
+```
+
+### Manually
+Download it to the `~/.terminus/plugins/` directory:
 ```
 mkdir -p ~/.terminus/plugins
 composer create-project -d ~/.terminus/plugins terminus-plugin-project/terminus-filer-plugin:~2
 ```
-For additional help installing, see [Terminus' Plugins](https://pantheon.io/docs/terminus/plugins/).
 
 ## Windows
 
