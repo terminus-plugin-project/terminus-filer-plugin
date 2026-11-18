@@ -1,5 +1,7 @@
 # Terminus Filer Plugin
 
+[![Terminus v4.x Compatible](https://img.shields.io/badge/terminus-v4.x-green.svg)](https://github.com/terminus-plugin-project/terminus-filer-plugin)
+[![Terminus v3.x Compatible](https://img.shields.io/badge/terminus-v3.x-green.svg)](https://github.com/terminus-plugin-project/terminus-filer-plugin)
 [![Terminus v2.x Compatible](https://img.shields.io/badge/terminus-v2.x-green.svg)](https://github.com/terminus-plugin-project/terminus-filer-plugin/tree/2.x)
 [![Terminus v1.x Compatible](https://img.shields.io/badge/terminus-v1.x-green.svg)](https://github.com/terminus-plugin-project/terminus-filer-plugin/tree/1.x)
 [![Terminus v0.x Compatible](https://img.shields.io/badge/terminus-v0.x-green.svg)](https://github.com/terminus-plugin-project/terminus-filer-plugin/tree/0.x)
@@ -66,12 +68,14 @@ There are a few different ways to install [Terminus' Plugins](https://pantheon.i
 terminus self:plugin:install  terminus-plugin-project/terminus-filer-plugin
 ```
 
-### Manually
+### Manually (Terminus 2.x only)
 Download it to the `~/.terminus/plugins/` directory:
 ```
 mkdir -p ~/.terminus/plugins
 composer create-project -d ~/.terminus/plugins terminus-plugin-project/terminus-filer-plugin:~2
 ```
+
+Terminus 3.x and 4.x only load plugins installed with `terminus self:plugin:install`.
 
 ## Windows
 
