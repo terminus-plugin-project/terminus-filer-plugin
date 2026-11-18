@@ -154,7 +154,13 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
 
         list($site, $env) = $this->getSiteEnv($site_env);
         $connection_info = $env->sftpConnectionInfo();
+        if (empty($connection_info)) {
+            // Terminus 4 returns no SFTP info for sites that do not support it
+            // (e.g. EVCS sites).
+            throw new TerminusException('SFTP is not available for {site_env}.', ['site_env' => $site_env]);
+        }
         $domain = $env->id . '-' . $site->get('name') . '.pantheon.io';
+        $connection = $connection_info['url'];
 
         if ($persist) {
             // Additional connection information
@@ -177,8 +183,6 @@ class FilerCommand extends TerminusCommand implements SiteAwareInterface
                     $connection = $bookmark_file;
                 }
             }
-        } else {
-            $connection = $connection_info['url'];
         }
 
         // Operating system specific checks
@@ -424,12 +428,8 @@ XML;
      * @return bool True if writing to the file was successful
      */
     private function writeXml($file, $data) {
-        try {
-            $handle = fopen($file, "w");
-            fwrite($handle, $data);
-            fclose($handle);
-        } catch (Exception $e) {
-            throw new TerminusException($e->getMessage());
+        if (@file_put_contents($file, $data) === false) {
+            throw new TerminusException('Unable to write {file}.', ['file' => $file]);
         }
         return true;
     }
